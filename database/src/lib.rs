@@ -1,6 +1,3 @@
-#![allow(dead_code)]
-#![allow(unused_imports)]
-
 use dotenvy::dotenv;
 use tokio;
 use sqlx::{
@@ -67,14 +64,14 @@ pub async fn db_connect() -> Pool<Postgres> {
         .unwrap()
 }
 
-pub async fn dex2name(pool: &Pool<Postgres>, dex: i32) -> Result<String, Error> {
+pub async fn dex2name(pool: &Pool<Postgres>, dex: impl Into<i64>) -> Result<String, Error> {
     let record = sqlx::query!(
         "
             SELECT name
             FROM pokemons
             WHERE dex = $1
         ",
-        dex
+        dex.into()
     )
     .fetch_one(pool)
     .await?;
@@ -82,7 +79,7 @@ pub async fn dex2name(pool: &Pool<Postgres>, dex: i32) -> Result<String, Error> 
     Ok(record.name)
 }
 
-pub async fn name2dex(pool: &Pool<Postgres>, name: impl Into<String>) -> Result<i32, Error> {
+pub async fn name2dex(pool: &Pool<Postgres>, name: impl Into<String>) -> Result<i64, Error> {
     let name = name.into().to_lowercase();
 
     let record = sqlx::query!(
