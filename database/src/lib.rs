@@ -1,56 +1,21 @@
 use dotenvy::dotenv;
-use tokio;
 use sqlx::{
     Error, Pool, Postgres,
     postgres::PgPoolOptions,
 };
 use std;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[tokio::test]
-    async fn connection_test() {
-        dotenv().ok();
-
-        let url = std::env::var("DATABASE_URL").expect("DATABASE_URL not set");
-        
-        let result = PgPoolOptions::new()
-            .max_connections(5)
-            .connect(&url)
-            .await;
-
-        assert!(!result.is_err(), "Couldn't connect to database");
-    }
-
-    #[tokio::test]
-    async fn dex2name_test() {
-        let pool = db_connect().await;
-
-        let bulbasaur = dex2name(&pool, 1).await.unwrap();
-        assert_eq!(bulbasaur, "bulbasaur");
-
-        let invalid = dex2name(&pool, -1).await;
-        assert_eq!(invalid.is_err(), true);
-    }
-
-    #[tokio::test]
-    async fn name2dex_test() {
-        let pool = db_connect().await;
-
-        let bulbasaur = name2dex(&pool, "bulbasaur").await.unwrap();
-        assert_eq!(bulbasaur, 1);
-
-        let bulbasaur = name2dex(&pool, "BuLbasAur").await.unwrap();
-        assert_eq!(bulbasaur, 1);
-
-        let invalid = name2dex(&pool, "").await;
-        assert_eq!(invalid.is_err(), true);
-    }
+pub struct Pokemon {
+    pub dex: i64,
+    pub name: String,
+    pub level40: i32,
+    pub tradeable: i32,
 }
 
-pub async fn db_connect() -> Pool<Postgres> {
+#[cfg(test)]
+mod tests;
+
+pub async fn connect() -> Pool<Postgres> {
     // Load config variables from `.env` file
     // Only needed on development
     dotenv().ok();
@@ -64,27 +29,31 @@ pub async fn db_connect() -> Pool<Postgres> {
         .unwrap()
 }
 
-pub async fn dex2name(pool: &Pool<Postgres>, dex: impl Into<i64>) -> Result<String, Error> {
-    let record = sqlx::query!(
+pub async fn get_by_dex(pool: &Pool<Postgres>, dex: impl Into<i64>) -> Result<Pokemon, Error> {
+    let dex = dex.into();
+
+    let record = sqlx::query_as!(
+        Pokemon,
         "
-            SELECT name
+            SELECT *
             FROM pokemons
             WHERE dex = $1
         ",
-        dex.into()
+        dex
     )
     .fetch_one(pool)
     .await?;
 
-    Ok(record.name)
+    Ok(record)
 }
 
-pub async fn name2dex(pool: &Pool<Postgres>, name: impl Into<String>) -> Result<i64, Error> {
+pub async fn get_by_name(pool: &Pool<Postgres>, name: impl Into<String>) -> Result<Pokemon, Error> {
     let name = name.into().to_lowercase();
 
-    let record = sqlx::query!(
+    let record = sqlx::query_as!(
+        Pokemon,
         "
-            SELECT dex
+            SELECT *
             FROM pokemons
             WHERE name = $1
         ",
@@ -93,5 +62,54 @@ pub async fn name2dex(pool: &Pool<Postgres>, name: impl Into<String>) -> Result<
     .fetch_one(pool)
     .await?;
 
-    Ok(record.dex)
+    Ok(record)
+}
+
+pub async fn dex2name(pool: &Pool<Postgres>, dex: impl Into<i64>) -> Result<String, Error> {
+    let pokemon = get_by_dex(pool, dex).await?;
+    Ok(pokemon.name)
+}
+
+pub async fn name2dex(pool: &Pool<Postgres>, name: impl Into<String>) -> Result<i64, Error> {
+    let pokemon = get_by_name(pool, name).await?;
+    Ok(pokemon.dex)
+}
+
+pub async fn update_level40(pool: &Pool<Postgres>, name: impl Into<String>, amount: impl Into<i32>) -> Result<Pokemon, Error> {
+    let amount = amount.into();
+    let name = name.into().to_lowercase();
+
+    let _ = sqlx::query!(
+        "
+            UPDATE pokemons
+            SET level40 = level40 + $1
+            WHERE name = $2
+        ",
+        amount,
+        name
+    )
+    .fetch_one(pool)
+    .await;
+
+    get_by_name(pool, name).await
+}
+
+pub async fn update_tradeable(pool: &Pool<Postgres>, name: impl Into<String>, amount: impl Into<i32>) -> Result<Pokemon, Error> {
+    let amount = amount.into();
+    let name = name.into().to_lowercase();
+
+    let _ = sqlx::query!(
+        "
+            UPDATE pokemons
+            SET tradeable = tradeable + $1
+            WHERE name = $2
+        ",
+        amount,
+        name
+    )
+    .fetch_one(pool)
+    .await;
+
+    get_by_name(pool, name).await
+
 }
