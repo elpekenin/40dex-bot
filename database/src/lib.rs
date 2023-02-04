@@ -29,9 +29,10 @@ pub async fn connect() -> Pool<Postgres> {
         .unwrap()
 }
 
-pub async fn get_by_dex(pool: &Pool<Postgres>, dex: impl Into<i64>) -> Result<Pokemon, Error> {
+pub async fn get_by_dex(dex: impl Into<i64>) -> Result<Pokemon, Error> {
     let dex = dex.into();
 
+    let pool = connect().await;
     let record = sqlx::query_as!(
         Pokemon,
         "
@@ -41,15 +42,16 @@ pub async fn get_by_dex(pool: &Pool<Postgres>, dex: impl Into<i64>) -> Result<Po
         ",
         dex
     )
-    .fetch_one(pool)
+    .fetch_one(&pool)
     .await?;
 
     Ok(record)
 }
 
-pub async fn get_by_name(pool: &Pool<Postgres>, name: impl Into<String>) -> Result<Pokemon, Error> {
+pub async fn get_by_name(name: impl Into<String>) -> Result<Pokemon, Error> {
     let name = name.into().to_lowercase();
 
+    let pool = connect().await;
     let record = sqlx::query_as!(
         Pokemon,
         "
@@ -59,26 +61,27 @@ pub async fn get_by_name(pool: &Pool<Postgres>, name: impl Into<String>) -> Resu
         ",
         name
     )
-    .fetch_one(pool)
+    .fetch_one(&pool)
     .await?;
 
     Ok(record)
 }
 
-pub async fn dex2name(pool: &Pool<Postgres>, dex: impl Into<i64>) -> Result<String, Error> {
-    let pokemon = get_by_dex(pool, dex).await?;
+pub async fn dex2name(dex: impl Into<i64>) -> Result<String, Error> {
+    let pokemon = get_by_dex(dex).await?;
     Ok(pokemon.name)
 }
 
-pub async fn name2dex(pool: &Pool<Postgres>, name: impl Into<String>) -> Result<i64, Error> {
-    let pokemon = get_by_name(pool, name).await?;
+pub async fn name2dex(name: impl Into<String>) -> Result<i64, Error> {
+    let pokemon = get_by_name(name).await?;
     Ok(pokemon.dex)
 }
 
-pub async fn update_level40(pool: &Pool<Postgres>, name: impl Into<String>, amount: impl Into<i32>) -> Result<Pokemon, Error> {
+pub async fn update_level40(name: impl Into<String>, amount: impl Into<i32>) -> Result<Pokemon, Error> {
     let amount = amount.into();
     let name = name.into().to_lowercase();
 
+    let pool = connect().await;
     let _ = sqlx::query!(
         "
             UPDATE pokemons
@@ -88,16 +91,17 @@ pub async fn update_level40(pool: &Pool<Postgres>, name: impl Into<String>, amou
         amount,
         name
     )
-    .fetch_one(pool)
+    .fetch_one(&pool)
     .await;
 
-    get_by_name(pool, name).await
+    get_by_name(name).await
 }
 
-pub async fn update_tradeable(pool: &Pool<Postgres>, name: impl Into<String>, amount: impl Into<i32>) -> Result<Pokemon, Error> {
+pub async fn update_tradeable(name: impl Into<String>, amount: impl Into<i32>) -> Result<Pokemon, Error> {
     let amount = amount.into();
     let name = name.into().to_lowercase();
 
+    let pool = connect().await;
     let _ = sqlx::query!(
         "
             UPDATE pokemons
@@ -107,9 +111,8 @@ pub async fn update_tradeable(pool: &Pool<Postgres>, name: impl Into<String>, am
         amount,
         name
     )
-    .fetch_one(pool)
+    .fetch_one(&pool)
     .await;
 
-    get_by_name(pool, name).await
-
+    get_by_name(name).await
 }

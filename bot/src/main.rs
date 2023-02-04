@@ -1,4 +1,3 @@
-use database;
 use dotenvy::dotenv;
 use teloxide::{
     adaptors::DefaultParseMode,
@@ -7,7 +6,8 @@ use teloxide::{
     utils::command::BotCommands,
 };
 
-mod bot_utils;
+mod utils;
+mod handlers;
 
 #[derive(BotCommands, Clone, Debug)]
 #[command(rename_rule = "snake_case", description = "These commands are supported:")]
@@ -47,15 +47,15 @@ async fn answer(bot: DefaultParseMode<Bot>, msg: Message, cmd: Command) -> Respo
     // Commands that can be used by anyone
     match cmd {
         Command::Help => {
-            bot.send_message(msg.chat.id, Command::descriptions().to_string()).await;
+            let _ = bot.send_message(msg.chat.id, Command::descriptions().to_string()).await;
             return Ok(());
         },
-        Command::Version => return unimplemented!(),
+        Command::Version => { return unimplemented!() },
         _  => { }
     }
 
     // Guard clause
-    match bot_utils::check_permission(msg.clone()) {
+    match utils::check_permission(msg.clone()) {
         Some(x) => {
             if !x {
                 // Unauthorized user - Quit
@@ -68,45 +68,20 @@ async fn answer(bot: DefaultParseMode<Bot>, msg: Message, cmd: Command) -> Respo
         }
     }
 
-    let pool = &database::connect().await;
-
     // Commands that require permission
-    // Code here **shouldnt** return, as that will prevent the connection pool from being closed
     match cmd {
         Command::Add(name) => {
-            match database::update_level40(pool, name, 1).await {
-                Ok(pokemon) => {
-                    bot.send_message(
-                    msg.chat.id,
-                    format!(
-                        "level40 counter for `{}` is now **{}**",
-                        pokemon.name,
-                        pokemon.level40
-                        )
-                    ).await?;
-                },
-                Err(_) => {
-                    bot.send_message(msg.chat.id, "There was an error updating the counter");
-                }
-            }
+            bot.send_message(
+                msg.chat.id,
+                handlers::level40_internal(name, 1).await
+            ).await?;
         },
 
         Command::Dec(name) => {
-            match database::update_level40(pool, name, -1).await {
-                Ok(pokemon) => {
-                    bot.send_message(
-                    msg.chat.id,
-                    format!(
-                        "level40 counter for `{}` is now **{}**",
-                        pokemon.name,
-                        pokemon.level40
-                        )
-                    ).await?;
-                },
-                Err(_) => {
-                    bot.send_message(msg.chat.id, "There was an error updating the counter");
-                }
-            }
+            bot.send_message(
+                msg.chat.id,
+                handlers::level40_internal(name, -1).await
+            ).await?;
         },
 
         // Fallback for un-implemented commands
@@ -115,6 +90,5 @@ async fn answer(bot: DefaultParseMode<Bot>, msg: Message, cmd: Command) -> Respo
         }
     }
 
-    pool.close().await;
     Ok(())
 }
