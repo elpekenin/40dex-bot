@@ -27,7 +27,21 @@ pub async fn tradeable_internal(name: impl Into<String>, amount: impl Into<i32>)
     }
 }
 
-pub async fn to40_internal() -> String {
+pub async fn maxed_internal() -> String {
+    let pokemons = match database::get_pokemons().await {
+        Err(_) => return String::from("❌ — There was an error reading pokemons data"),
+        Ok(pokemons) => pokemons,
+    };
+
+    let families = match database::get_families().await {
+        Err(_) => return String::from("❌ — There was an error reading families data"),
+        Ok(families) => families,
+    };
+
+    format!("`{} & !n40 & shiny & lucky`", markdown::escape(&utils::generate_got40_string(pokemons, families)))
+}
+
+pub async fn non_maxed_internal() -> String {
     let pokemons = match database::get_pokemons().await {
         Err(_) => return String::from("❌ — There was an error reading pokemons data"),
         Ok(pokemons) => pokemons,

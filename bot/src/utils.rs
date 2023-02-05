@@ -42,26 +42,12 @@ fn block_str(block_start: &i32, last: &i32) -> String {
     format!("{}, ", last)
 }
 
-pub fn generate_to40_string(pokemons: Vec<Pokemon>, families: Vec<Family>) -> String {
-    // Convert family/pokemon data into list of non-maxed dex numbers
-    let mut filtered: Vec<&i32> = families
-                                    .iter()
-                                    .filter( // Get only the families with no maxed mons, ie families where all `level40` counters are 0
-                                        |family| family.pokemons.iter().all(
-                                            |dex| get_poke_from_list(&pokemons, *dex).level40 == 0
-                                        )
-                                    )
-                                    .flat_map( // Flatten the 'pokemons' Vec on each family into a single Vec
-                                        |family| family.pokemons.iter()
-                                    )
-                                    .collect(); // Convert Iterator into Vec
-    filtered.sort();
-
-    // Convert list into search string
+fn pokemon_vec_to_string(vector: Vec<&i32>) -> String {
     let mut output = String::new();
-    let mut block_start = filtered[0];
-    let mut last = filtered[0];
-    for dex in filtered {
+    let mut block_start = vector[0];
+    let mut last = vector[0];
+
+    for dex in vector {
         // Non-contiguous number, add previous block to string
         if *dex > last + 1 {
             output.push_str(&block_str(block_start, last));
@@ -80,4 +66,37 @@ pub fn generate_to40_string(pokemons: Vec<Pokemon>, families: Vec<Family>) -> St
     // Remove last comma and space
     output.trim_end_matches(", ").to_string()
 }
-// get_container_date
+
+pub fn generate_got40_string(pokemons: Vec<Pokemon>, families: Vec<Family>) -> String {
+    let mut filtered: Vec<&i32> = families
+                                    .iter()
+                                    .filter( // Get only the families with any maxed mon, ie families where any `level40` counter is > 0
+                                        |family| family.pokemons.iter().any(
+                                            |dex| get_poke_from_list(&pokemons, *dex).level40 > 0
+                                        )
+                                    )
+                                    .flat_map( // Flatten the `pokemons` Vec on each family into a single Vec
+                                        |family| family.pokemons.iter()
+                                    )
+                                    .collect(); // Convert Iterator into Vec
+    filtered.sort();
+
+    pokemon_vec_to_string(filtered)
+}
+
+pub fn generate_to40_string(pokemons: Vec<Pokemon>, families: Vec<Family>) -> String {
+    let mut filtered: Vec<&i32> = families
+                                    .iter()
+                                    .filter( // Get only the families with no maxed mons, ie families where all `level40` counters are 0
+                                        |family| family.pokemons.iter().all(
+                                            |dex| get_poke_from_list(&pokemons, *dex).level40 == 0
+                                        )
+                                    )
+                                    .flat_map( // Flatten the `pokemons` Vec on each family into a single Vec
+                                        |family| family.pokemons.iter()
+                                    )
+                                    .collect(); // Convert Iterator into Vec
+    filtered.sort();
+
+    pokemon_vec_to_string(filtered)
+}

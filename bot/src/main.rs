@@ -15,6 +15,9 @@ enum Command {
     #[command(description = "add 1 to a pokemon's `level40` counter")]
     Add(String),
 
+    #[command(description = "search string to cleanup already 40'd pokemon species")]
+    AlreadyMaxed,
+
     #[command(description = "add 1 to a pokemon's `tradeable` counter")]
     Catch(String),
 
@@ -24,8 +27,8 @@ enum Command {
     #[command(description = "display this help message")]
     Help,
 
-    #[command(description = "search string for non 40'd pokemons")]
-    To40,
+    #[command(description = "search string for non 40'd pokemon species")]
+    NonMaxed,
 
     #[command(description = "substract 1 from a pokemon's `tradeable` counter")]
     Trade(String),
@@ -42,6 +45,7 @@ async fn main() {
     dotenv().ok();
 
     let bot = Bot::from_env().parse_mode(ParseMode::MarkdownV2);
+    let _ = bot.set_my_commands(Command::bot_commands()).await;
 
     Command::repl(bot, answer).await;
 }
@@ -111,10 +115,17 @@ async fn answer(bot: DefaultParseMode<Bot>, msg: Message, cmd: Command) -> Respo
             ).await?;
         },
 
-        Command::To40 => {
+        Command::AlreadyMaxed => {
             let _ = bot.send_message(
                 msg.chat.id,
-                handlers::to40_internal().await
+                handlers::maxed_internal().await
+            ).await?;
+        },
+
+        Command::NonMaxed => {
+            let _ = bot.send_message(
+                msg.chat.id,
+                handlers::non_maxed_internal().await
             ).await?;
         }
 
