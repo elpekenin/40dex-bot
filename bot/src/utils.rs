@@ -47,7 +47,7 @@ pub fn generate_to40_string(pokemons: Vec<Pokemon>, families: Vec<Family>) -> St
     let mut filtered: Vec<&i32> = families
                                     .iter()
                                     .filter( // Get only the families with no maxed mons, ie families where all `level40` counters are 0
-                                    |   family| family.pokemons.iter().all(
+                                        |family| family.pokemons.iter().all(
                                             |dex| get_poke_from_list(&pokemons, *dex).level40 == 0
                                         )
                                     )
