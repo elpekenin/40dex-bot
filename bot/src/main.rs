@@ -6,8 +6,8 @@ use teloxide::{
     utils::command::BotCommands,
 };
 
-mod utils;
 mod handlers;
+mod utils;
 
 #[derive(BotCommands, Clone, Debug)]
 #[command(rename_rule = "snake_case", description = "These commands are supported:")]
@@ -24,10 +24,13 @@ enum Command {
     #[command(description = "display this help message")]
     Help,
 
+    #[command(description = "search string for non 40'd pokemons")]
+    To40,
+
     #[command(description = "substract 1 from a pokemon's `tradeable` counter")]
     Trade(String),
 
-    #[command(description = "display information about container and commit")]
+    #[command(description = "display information about current version")]
     Version,
 }
 
@@ -54,7 +57,7 @@ async fn answer(bot: DefaultParseMode<Bot>, msg: Message, cmd: Command) -> Respo
             let _ = bot.send_message(
                 msg.chat.id,
                 format!(
-                    "Built with commit: _{}_",
+                    "🤖 I was built with commit: _{}_",
                     utils::get_commit_hash()
                 )
             ).await;
@@ -63,6 +66,7 @@ async fn answer(bot: DefaultParseMode<Bot>, msg: Message, cmd: Command) -> Respo
         _  => { }
     }
 
+    
     // Guard clause
     match utils::check_permission(msg.clone()) {
         Some(x) => {
@@ -106,6 +110,13 @@ async fn answer(bot: DefaultParseMode<Bot>, msg: Message, cmd: Command) -> Respo
                 handlers::tradeable_internal(name, -1).await
             ).await?;
         },
+
+        Command::To40 => {
+            let _ = bot.send_message(
+                msg.chat.id,
+                handlers::to40_internal().await
+            ).await?;
+        }
 
         // Fallback for un-implemented commands
         x => {

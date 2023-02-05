@@ -60,3 +60,9 @@ async fn update_tradeable_test() {
     let back = get_by_name("bulbasaur").await.unwrap();
     assert_eq!(start.tradeable, back.tradeable);
 }
+
+#[tokio::test]
+async fn get_families_test() {
+    let valid = get_families().await;
+    assert_eq!(valid.is_err(), false);
+}

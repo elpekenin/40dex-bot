@@ -5,11 +5,19 @@ use sqlx::{
 };
 use std;
 
+#[derive(Debug)]
 pub struct Pokemon {
-    pub dex: i64,
+    pub dex: i32,
     pub name: String,
     pub level40: i32,
     pub tradeable: i32,
+}
+
+#[derive(Debug)]
+pub struct Family {
+    pub id: i32,
+    pub regions: Vec<i32>,
+    pub pokemons: Vec<i32>,
 }
 
 #[cfg(test)]
@@ -29,7 +37,7 @@ async fn connect() -> Pool<Postgres> {
         .unwrap()
 }
 
-pub async fn get_by_dex(dex: impl Into<i64>) -> Result<Pokemon, Error> {
+pub async fn get_by_dex(dex: impl Into<i32>) -> Result<Pokemon, Error> {
     let dex = dex.into();
 
     let pool = connect().await;
@@ -67,12 +75,12 @@ pub async fn get_by_name(name: impl Into<String>) -> Result<Pokemon, Error> {
     Ok(record)
 }
 
-pub async fn dex2name(dex: impl Into<i64>) -> Result<String, Error> {
+pub async fn dex2name(dex: impl Into<i32>) -> Result<String, Error> {
     let pokemon = get_by_dex(dex).await?;
     Ok(pokemon.name)
 }
 
-pub async fn name2dex(name: impl Into<String>) -> Result<i64, Error> {
+pub async fn name2dex(name: impl Into<String>) -> Result<i32, Error> {
     let pokemon = get_by_name(name).await?;
     Ok(pokemon.dex)
 }
@@ -115,4 +123,30 @@ pub async fn update_tradeable(name: impl Into<String>, amount: impl Into<i32>) -
     .await;
 
     get_by_name(name).await
+}
+
+pub async fn get_families() -> Result<Vec<Family>, Error> {
+    let pool = connect().await;
+    sqlx::query_as!(
+        Family,
+        "
+            SELECT *
+            FROM families
+        "
+    )
+    .fetch_all(&pool)
+    .await
+}
+
+pub async fn get_pokemons() -> Result<Vec<Pokemon>, Error> {
+    let pool = connect().await;
+    sqlx::query_as!(
+        Pokemon,
+        "
+            SELECT *
+            FROM pokemons
+        "
+    )
+    .fetch_all(&pool)
+    .await
 }
