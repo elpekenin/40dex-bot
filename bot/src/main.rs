@@ -50,7 +50,16 @@ async fn answer(bot: DefaultParseMode<Bot>, msg: Message, cmd: Command) -> Respo
             let _ = bot.send_message(msg.chat.id, Command::descriptions().to_string()).await;
             return Ok(());
         },
-        Command::Version => { return unimplemented!() },
+        Command::Version => {
+            let _ = bot.send_message(
+                msg.chat.id,
+                format!(
+                    "Built with commit: _{}_",
+                    utils::get_commit_hash()
+                )
+            ).await;
+            return Ok(());
+        },
         _  => { }
     }
 
@@ -71,22 +80,40 @@ async fn answer(bot: DefaultParseMode<Bot>, msg: Message, cmd: Command) -> Respo
     // Commands that require permission
     match cmd {
         Command::Add(name) => {
-            bot.send_message(
+            let _ = bot.send_message(
                 msg.chat.id,
                 handlers::level40_internal(name, 1).await
             ).await?;
         },
 
         Command::Dec(name) => {
-            bot.send_message(
+            let _ = bot.send_message(
                 msg.chat.id,
                 handlers::level40_internal(name, -1).await
+            ).await?;
+        },
+
+        Command::Catch(name) => {
+            let _ = bot.send_message(
+                msg.chat.id,
+                handlers::tradeable_internal(name, 1).await
+            ).await?;
+        },
+
+        Command::Trade(name) => {
+            let _ = bot.send_message(
+                msg.chat.id,
+                handlers::tradeable_internal(name, -1).await
             ).await?;
         },
 
         // Fallback for un-implemented commands
         x => {
             log::warn!("Un-handled command: {:?}", x);
+            let _ = bot.send_message(
+                msg.chat.id,
+                "Unimplemented"
+            ).await?;
         }
     }
 

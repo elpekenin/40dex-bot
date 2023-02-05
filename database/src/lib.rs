@@ -15,7 +15,7 @@ pub struct Pokemon {
 #[cfg(test)]
 mod tests;
 
-pub async fn connect() -> Pool<Postgres> {
+async fn connect() -> Pool<Postgres> {
     // Load config variables from `.env` file
     // Only needed on development
     dotenv().ok();
