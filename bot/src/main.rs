@@ -55,26 +55,21 @@ async fn main() {
 
 async fn answer(bot: DefaultParseMode<Bot>, msg: Message, cmd: Command) -> ResponseResult<()> {
     // Commands that can be used by anyone
-    match cmd {
-        Command::Help => {
-            let _ = bot.send_message(msg.chat.id, markdown::escape(&Command::descriptions().to_string())).await;
+    let text = match cmd {
+        Command::Help => Some(markdown::escape(&Command::descriptions().to_string())),
+        Command::Version => Some(format!("🤖 I was built with commit: _{}_", utils::get_commit_hash())),
+        _  => None
+    };
+
+    match text {
+        Some(text) => { 
+            bot.send_message(msg.chat.id, text).await?;
             return Ok(());
         },
-        Command::Version => {
-            let _ = bot.send_message(
-                msg.chat.id,
-                format!(
-                    "🤖 I was built with commit: _{}_",
-                    utils::get_commit_hash()
-                )
-            ).await;
-            return Ok(());
-        },
-        _  => { }
+        None => { }
     }
 
-    
-    // Guard clause
+    // Permission guard clause
     match utils::check_permission(msg.clone()) {
         Some(x) => {
             if !x {
@@ -88,59 +83,26 @@ async fn answer(bot: DefaultParseMode<Bot>, msg: Message, cmd: Command) -> Respo
         }
     }
 
-    // Commands that require permission
-    match cmd {
-        Command::Add(name) => {
-            let _ = bot.send_message(
-                msg.chat.id,
-                handlers::level40_internal(name, 1).await
-            ).await?;
-        },
-
-        Command::Dec(name) => {
-            let _ = bot.send_message(
-                msg.chat.id,
-                handlers::level40_internal(name, -1).await
-            ).await?;
-        },
-
-        Command::Catch(name) => {
-            let _ = bot.send_message(
-                msg.chat.id,
-                handlers::tradeable_internal(name, 1).await
-            ).await?;
-        },
-
-        Command::Trade(name) => {
-            let _ = bot.send_message(
-                msg.chat.id,
-                handlers::tradeable_internal(name, -1).await
-            ).await?;
-        },
-
-        Command::AlreadyMaxed => {
-            let _ = bot.send_message(
-                msg.chat.id,
-                handlers::maxed_internal().await
-            ).await?;
-        },
-
-        Command::NonMaxed => {
-            let _ = bot.send_message(
-                msg.chat.id,
-                handlers::non_maxed_internal().await
-            ).await?;
-        }
+    // Restricted commands
+    let text = match cmd {
+        Command::Add(name) => handlers::level40_internal(name, 1).await,
+        Command::AlreadyMaxed => handlers::maxed_internal().await,
+        Command::Catch(name) => handlers::tradeable_internal(name, 1).await,
+        Command::Dec(name) => handlers::level40_internal(name, -1).await,
+        Command::NonMaxed => handlers::non_maxed_internal().await,
+        Command::Trade(name) => handlers::tradeable_internal(name, -1).await,
 
         // Fallback for un-implemented commands
         x => {
             log::warn!("Un-handled command: {:?}", x);
-            let _ = bot.send_message(
-                msg.chat.id,
-                "Unimplemented"
-            ).await?;
+            "Unimplemented".to_string()
         }
-    }
+    };
+
+    bot.send_message(
+        msg.chat.id,
+        text,
+    ).await?;
 
     Ok(())
 }
