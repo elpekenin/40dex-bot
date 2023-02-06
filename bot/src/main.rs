@@ -13,27 +13,27 @@ mod handlers;
 mod utils;
 
 #[derive(BotCommands, Clone, Debug)]
-#[command(rename_rule = "snake_case", description = "These commands are supported:")]
+#[command(rename_rule = "snake_case", description = "These commands are supported")]
 enum Command {
-    #[command(description = "add 1 to a pokemon's level40 counter")]
+    #[command(description = "add 1 to a pokemon level40 counter")]
     Add(String),
 
-    #[command(description = "search string to cleanup already 40'd pokemon species")]
+    #[command(description = "search string to cleanup already 40d pokemon species")]
     AlreadyMaxed,
 
-    #[command(description = "add 1 to a pokemon's tradeable counter")]
+    #[command(description = "add 1 to a pokemon tradeable counter")]
     Catch(String),
 
-    #[command(description = "substract 1 from a pokemon's level40 counter")]
+    #[command(description = "substract 1 from a pokemon level40 counter")]
     Dec(String),
 
     #[command(description = "display this help message")]
     Help,
 
-    #[command(description = "search string for non 40'd pokemon species")]
+    #[command(description = "search string for non 40d pokemon species")]
     NonMaxed,
 
-    #[command(description = "substract 1 from a pokemon's `tradeable` counter")]
+    #[command(description = "substract 1 from a pokemon tradeable counter")]
     Trade(String),
 
     #[command(description = "display information about current version")]
@@ -85,18 +85,14 @@ async fn answer(bot: DefaultParseMode<Bot>, msg: Message, cmd: Command) -> Respo
 
     // Restricted commands
     let text = match cmd {
-        Command::Add(name) => handlers::level40_internal(name, 1).await,
-        Command::AlreadyMaxed => handlers::maxed_internal().await,
-        Command::Catch(name) => handlers::tradeable_internal(name, 1).await,
-        Command::Dec(name) => handlers::level40_internal(name, -1).await,
-        Command::NonMaxed => handlers::non_maxed_internal().await,
-        Command::Trade(name) => handlers::tradeable_internal(name, -1).await,
+        Command::Add(name) => handlers::update_level40(name, 1).await,
+        Command::AlreadyMaxed => handlers::already_maxed_string().await,
+        Command::Catch(name) => handlers::update_tradeable(name, 1).await,
+        Command::Dec(name) => handlers::update_level40(name, -1).await,
+        Command::NonMaxed => handlers::non_maxed_string().await,
+        Command::Trade(name) => handlers::update_tradeable(name, -1).await,
 
-        // Fallback for un-implemented commands
-        x => {
-            log::warn!("Un-handled command: {:?}", x);
-            "Unimplemented".to_string()
-        }
+        _ => "Unimplemented command".to_string()
     };
 
     bot.send_message(

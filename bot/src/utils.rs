@@ -81,7 +81,10 @@ pub fn generate_already_maxed_string(pokemons: Vec<Pokemon>, families: Vec<Famil
                                     .collect(); // Convert Iterator into Vec
     filtered.sort();
 
-    pokemon_vec_to_string(filtered)
+    let mut string = pokemon_vec_to_string(filtered);
+    string.push_str(" & !n40 & shiny & lucky");
+
+    string
 }
 
 pub fn generate_non_maxed_string(pokemons: Vec<Pokemon>, families: Vec<Family>) -> String {
