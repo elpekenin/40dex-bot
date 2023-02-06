@@ -38,7 +38,7 @@ pub async fn maxed_internal() -> String {
         Ok(families) => families,
     };
 
-    format!("`{} & !n40 & shiny & lucky`", markdown::escape(&utils::generate_got40_string(pokemons, families)))
+    format!("`{} & !n40 & shiny & lucky`", markdown::escape(&utils::generate_already_maxed_string(pokemons, families)))
 }
 
 pub async fn non_maxed_internal() -> String {
@@ -52,5 +52,5 @@ pub async fn non_maxed_internal() -> String {
         Ok(families) => families,
     };
 
-    format!("`{}`", markdown::escape(&utils::generate_to40_string(pokemons, families)))
+    format!("`{}`", markdown::escape(&utils::generate_non_maxed_string(pokemons, families)))
 }

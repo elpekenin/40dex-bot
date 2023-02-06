@@ -67,7 +67,7 @@ fn pokemon_vec_to_string(vector: Vec<&i32>) -> String {
     output.trim_end_matches(", ").to_string()
 }
 
-pub fn generate_got40_string(pokemons: Vec<Pokemon>, families: Vec<Family>) -> String {
+pub fn generate_already_maxed_string(pokemons: Vec<Pokemon>, families: Vec<Family>) -> String {
     let mut filtered: Vec<&i32> = families
                                     .iter()
                                     .filter( // Get only the families with any maxed mon, ie families where any `level40` counter is > 0
@@ -84,7 +84,7 @@ pub fn generate_got40_string(pokemons: Vec<Pokemon>, families: Vec<Family>) -> S
     pokemon_vec_to_string(filtered)
 }
 
-pub fn generate_to40_string(pokemons: Vec<Pokemon>, families: Vec<Family>) -> String {
+pub fn generate_non_maxed_string(pokemons: Vec<Pokemon>, families: Vec<Family>) -> String {
     let mut filtered: Vec<&i32> = families
                                     .iter()
                                     .filter( // Get only the families with no maxed mons, ie families where all `level40` counters are 0

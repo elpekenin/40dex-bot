@@ -3,7 +3,10 @@ use teloxide::{
     adaptors::DefaultParseMode,
     prelude::*,
     types::ParseMode,
-    utils::command::BotCommands,
+    utils::{
+        markdown,
+        command::BotCommands
+    },
 };
 
 mod handlers;
@@ -12,16 +15,16 @@ mod utils;
 #[derive(BotCommands, Clone, Debug)]
 #[command(rename_rule = "snake_case", description = "These commands are supported:")]
 enum Command {
-    #[command(description = "add 1 to a pokemon's `level40` counter")]
+    #[command(description = "add 1 to a pokemon's level40 counter")]
     Add(String),
 
     #[command(description = "search string to cleanup already 40'd pokemon species")]
     AlreadyMaxed,
 
-    #[command(description = "add 1 to a pokemon's `tradeable` counter")]
+    #[command(description = "add 1 to a pokemon's tradeable counter")]
     Catch(String),
 
-    #[command(description = "substract 1 from a pokemon's `level40` counter")]
+    #[command(description = "substract 1 from a pokemon's level40 counter")]
     Dec(String),
 
     #[command(description = "display this help message")]
@@ -54,7 +57,7 @@ async fn answer(bot: DefaultParseMode<Bot>, msg: Message, cmd: Command) -> Respo
     // Commands that can be used by anyone
     match cmd {
         Command::Help => {
-            let _ = bot.send_message(msg.chat.id, Command::descriptions().to_string()).await;
+            let _ = bot.send_message(msg.chat.id, markdown::escape(&Command::descriptions().to_string())).await;
             return Ok(());
         },
         Command::Version => {
