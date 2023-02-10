@@ -1,11 +1,12 @@
 use dotenvy::dotenv;
+use serde::Serialize;
 use sqlx::{
     Error, Pool, Postgres,
     postgres::PgPoolOptions,
 };
 use std;
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct Pokemon {
     pub dex: i32,
     pub name: String,
@@ -13,7 +14,7 @@ pub struct Pokemon {
     pub tradeable: i32,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct Family {
     pub id: i32,
     pub regions: Vec<i32>,

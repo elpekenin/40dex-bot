@@ -1,4 +1,7 @@
-use teloxide::utils::command::BotCommands;
+use teloxide::{
+    types::BotCommand,
+    utils::{command::BotCommands, markdown},
+};
 
 #[derive(BotCommands, Clone, Debug)]
 #[command(
@@ -36,4 +39,19 @@ pub enum AdminCommand {
 
     #[command(description = "substract 1 from a pokemon tradeable counter")]
     Trade(String),
+}
+
+pub fn descriptions() -> Vec<BotCommand> {
+    UserCommand::bot_commands()
+        .into_iter()
+        .chain(AdminCommand::bot_commands().into_iter())
+        .collect()
+}
+
+pub fn help() -> String {
+    markdown::escape(&format!(
+        "{}\n\n{}",
+        UserCommand::descriptions(),
+        AdminCommand::descriptions()
+    ))
 }

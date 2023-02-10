@@ -9,3 +9,4 @@ edition = "2021"
 dotenvy = "0.15.6"
 tokio = { version = "1.25.0", features = ["macros"] }
 sqlx = { version = "0.6", features = [ "runtime-tokio-rustls", "postgres" ] }
+serde = "1.0.152"

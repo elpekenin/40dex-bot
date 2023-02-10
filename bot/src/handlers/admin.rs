@@ -1,3 +1,4 @@
+use super::internal::admin as internal;
 use crate::{commands::AdminCommand, utils};
 use teloxide::{
     adaptors::DefaultParseMode, prelude::Requester, requests::ResponseResult, types::Message, Bot,
@@ -31,20 +32,14 @@ pub async fn handle(
     }
 
     let text = match cmd {
-        AdminCommand::Add(name) => super::internal::admin::update_table(name, 1, "level40").await,
-        AdminCommand::Dec(name) => super::internal::admin::update_table(name, -1, "level40").await,
+        AdminCommand::Add(name) => internal::update_pokemon(name, 1, "level40").await,
+        AdminCommand::Dec(name) => internal::update_pokemon(name, -1, "level40").await,
 
-        AdminCommand::Catch(name) => {
-            super::internal::admin::update_table(name, 1, "tradeable").await
-        }
-        AdminCommand::Trade(name) => {
-            super::internal::admin::update_table(name, -1, "tradeable").await
-        }
-
-        _ => "Unimplemented command".to_string(),
+        AdminCommand::Catch(name) => internal::update_pokemon(name, 1, "tradeable").await,
+        AdminCommand::Trade(name) => internal::update_pokemon(name, -1, "tradeable").await,
     };
 
-    bot.send_message(msg.chat.id, text).await;
+    let _ = bot.send_message(msg.chat.id, text).await;
 
     Ok(())
 }
