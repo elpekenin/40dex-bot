@@ -2,7 +2,6 @@ mod commands;
 mod handlers;
 mod utils;
 
-use commands::*;
 use dotenvy::dotenv;
 use teloxide::{prelude::*, types::ParseMode};
 
@@ -15,19 +14,17 @@ async fn main() {
 
     let bot = Bot::from_env().parse_mode(ParseMode::MarkdownV2);
 
-    let commands = commands::descriptions();
-
-    let _ = bot.set_my_commands(commands).await;
+    let _ = bot.set_my_commands(commands::descriptions()).await;
 
     let handler = Update::filter_message()
         .branch(
             dptree::entry()
-                .filter_command::<AdminCommand>()
+                .filter_command::<commands::AdminCommand>()
                 .endpoint(handlers::admin::handle),
         )
         .branch(
             dptree::entry()
-                .filter_command::<UserCommand>()
+                .filter_command::<commands::UserCommand>()
                 .endpoint(handlers::user::handle),
         );
 
