@@ -1,0 +1,53 @@
+{% include "header.html" %}
+
+{% include "40dex-header.html" %}
+
+<!-- <div style="margin-bottom: 70px"></div> -->
+
+{% set regions = [1, 152, 252, 387, 494, 650, 722, 810] %}
+
+<table style="margin-left: auto; margin-right: auto; text-align: center; transform: translateY(10px);">
+{% for family in families %}
+    {% set size = "min(100px, "~ (100/((family.pokemons | length) + 3)) | safe ~ "vw)" %}
+    <tr class="{{ family.pokemons | selectattr('name') | join(' ') }}">
+        <td style="--size: {{ size }};">
+    {% for pokemon in family.pokemons %}
+        {% set image_path = ["static", "sprites", "edited" if pokemon.tradeable else "original", pokemon.dex | safe + ".png"] | join("/") %}
+        {% set border_color="green" if pokemon.level40 else "red" %}
+
+        {# FIXME: On new regions #}
+        {% for region in regions %}
+            {% if pokemon.dex == region %}
+                <a id="{{ loop.index0 + 1 }}">
+                <hr class="m-5 p-5" />
+            {% endif %}
+        {% endfor %}
+
+            <div style="position: relative;" class="d-inline-block">
+                <img 
+                    loading="lazy"
+                    src="{{ image_path }}"
+                    alt="{{ pokemon.name }}"
+                    class="img-fluid float-left"
+                    style="width: var(--size); height: var(--size); border-radius: calc(0.3*var(--size)); border: 3px solid {{ border_color }};"
+                >
+
+                <div
+                    style="font-weight: bold; font-size: calc(0.2*var(--size));
+                    text-shadow: 2px 0 #fff, -2px 0 #fff, 0 2px #fff, 0 -2px #fff, 1px 1px #fff, -1px -1px #fff, 1px -1px #fff, -1px 1px #fff;;
+                    position: absolute; top: 2%; right: 10%; font-family: sans-serif;"
+                >
+                    {{ pokemon.level40}}
+                </div>
+            </div>
+
+    {% endfor %} {# Pokemons loop #}
+            <b class="align-middle" style="display: inline-block; font-size: calc(0.6*var(--size));">
+                {{ "✅" if family.pokemons | selectattr("level40") | max else "❌" }}
+            </b> 
+        </td> {# Level40 marker #}
+    </tr>
+{% endfor %} {# Families loop #}
+</table>
+
+{% include "footer.html" %}

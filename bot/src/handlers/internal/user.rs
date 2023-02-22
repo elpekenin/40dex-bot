@@ -1,5 +1,5 @@
 use crate::utils;
-use database::{Family, Pokemon};
+use database::MergedFamily;
 use teloxide::utils::markdown;
 
 pub fn get_commit_hash() -> String {
@@ -16,10 +16,6 @@ pub fn get_commit_hash() -> String {
             Err(_) => String::from("NA"),
         },
     }
-}
-
-fn get_poke_from_list(pokemons: &Vec<Pokemon>, dex: i32) -> &Pokemon {
-    pokemons.iter().find(|x| x.dex == dex).unwrap()
 }
 
 fn block_str(first: &i32, last: &i32) -> String {
@@ -55,22 +51,11 @@ fn pokemon_vec_to_string(vector: Vec<&i32>) -> String {
     output.trim_end_matches(", ").to_string()
 }
 
-pub fn already_maxed_string(pokemons: Vec<Pokemon>, families: Vec<Family>) -> String {
+pub fn already_maxed_string(families: Vec<MergedFamily>) -> String {
     let mut filtered: Vec<&i32> = families
         .iter()
-        .filter(
-            // Get only the families with any maxed mon, ie families where any `level40` counter is > 0
-            |family| {
-                family
-                    .pokemons
-                    .iter()
-                    .any(|dex| get_poke_from_list(&pokemons, *dex).level40 > 0)
-            },
-        )
-        .flat_map(
-            // Flatten the `pokemons` Vec on each family into a single Vec
-            |family| family.pokemons.iter(),
-        )
+        .filter(|f| f.pokemons.iter().any(|p| p.level40 > 0))
+        .flat_map(|f| f.pokemons.iter().map(|p| &p.dex))
         .collect(); // Convert Iterator into Vec
     filtered.sort();
 
@@ -80,22 +65,11 @@ pub fn already_maxed_string(pokemons: Vec<Pokemon>, families: Vec<Family>) -> St
     string
 }
 
-pub fn non_maxed_string(pokemons: Vec<Pokemon>, families: Vec<Family>) -> String {
+pub fn non_maxed_string(families: Vec<MergedFamily>) -> String {
     let mut filtered: Vec<&i32> = families
         .iter()
-        .filter(
-            // Get only the families with no maxed mons, ie families where all `level40` counters are 0
-            |family| {
-                family
-                    .pokemons
-                    .iter()
-                    .all(|dex| get_poke_from_list(&pokemons, *dex).level40 == 0)
-            },
-        )
-        .flat_map(
-            // Flatten the `pokemons` Vec on each family into a single Vec
-            |family| family.pokemons.iter(),
-        )
+        .filter(|f| f.pokemons.iter().all(|p| p.level40 == 0))
+        .flat_map(|f| f.pokemons.iter().map(|p| &p.dex))
         .collect(); // Convert Iterator into Vec
     filtered.sort();
 
@@ -103,19 +77,14 @@ pub fn non_maxed_string(pokemons: Vec<Pokemon>, families: Vec<Family>) -> String
 }
 
 pub async fn generate_search_string(maxed: bool) -> String {
-    let pokemons = match database::get_pokemons().await {
-        Err(e) => return utils::format_error("There was an error reading pokemons data", e),
-        Ok(pokemons) => pokemons,
-    };
-
-    let families = match database::get_families().await {
-        Err(e) => return utils::format_error("There was an error reading families data`", e),
+    let families = match database::get_merged().await {
+        Err(e) => return utils::format_error("There was an error reading database`", e),
         Ok(families) => families,
     };
 
     let string = match maxed {
-        true => already_maxed_string(pokemons, families),
-        false => non_maxed_string(pokemons, families),
+        true => already_maxed_string(families),
+        false => non_maxed_string(families),
     };
 
     format!("`{}`", markdown::escape(&string))

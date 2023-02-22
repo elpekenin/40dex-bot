@@ -6,7 +6,7 @@ use sqlx::{
 };
 use std;
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone)]
 pub struct Pokemon {
     pub dex: i32,
     pub name: String,
@@ -19,6 +19,13 @@ pub struct Family {
     pub id: i32,
     pub regions: Vec<i32>,
     pub pokemons: Vec<i32>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct MergedFamily {
+    pub id: i32,
+    pub regions: Vec<i32>,
+    pub pokemons: Vec<Pokemon>,
 }
 
 #[cfg(test)]
@@ -150,4 +157,25 @@ pub async fn get_pokemons() -> Result<Vec<Pokemon>, Error> {
     )
     .fetch_all(&pool)
     .await
+}
+
+pub async fn get_merged() -> Result<Vec<MergedFamily>, Error> {
+    let families = get_families().await?;
+    let pokemons = get_pokemons().await?;
+
+    let merged: Vec<MergedFamily> = families
+            .iter()
+            .map(|f| {
+                let mut pokemons: Vec<Pokemon> = pokemons.clone().into_iter().filter(|p| f.pokemons.contains(&p.dex)).collect();
+                pokemons.sort_by(|x, y| x.dex.cmp(&y.dex));
+
+                MergedFamily {
+                    id: f.id,
+                    regions: f.regions.clone(),
+                    pokemons
+                }
+            })
+            .collect();
+
+    Ok(merged)
 }
