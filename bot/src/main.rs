@@ -3,7 +3,10 @@ mod handlers;
 mod utils;
 
 use dotenvy::dotenv;
-use teloxide::{prelude::*, types::ParseMode};
+use teloxide::{
+    prelude::*,
+    types::{BotCommandScope, ParseMode},
+};
 
 #[tokio::main]
 async fn main() {
@@ -14,7 +17,10 @@ async fn main() {
 
     let bot = Bot::from_env().parse_mode(ParseMode::MarkdownV2);
 
-    let _ = bot.set_my_commands(commands::descriptions()).await;
+    let _ = bot
+        .set_my_commands(commands::descriptions())
+        .scope(BotCommandScope::AllPrivateChats)
+        .await;
 
     let handler = Update::filter_message()
         .branch(
