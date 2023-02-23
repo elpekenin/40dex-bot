@@ -54,7 +54,6 @@ async fn main() -> std::io::Result<()> {
             .app_data(tmpl_reloader.clone())
             .service(fs::Files::new("/static", "static").show_files_listing())
             .service(web::resource("/40dex").route(web::get().to(handlers::index)))
-            .service(web::resource("/40dex/").route(web::get().to(handlers::index)))
             .service(fs::Files::new("/", "static/dist").index_file("index.html").show_files_listing())
             .wrap(ErrorHandlers::new().handler(StatusCode::NOT_FOUND, handlers::not_found))
             .wrap(Logger::default())
