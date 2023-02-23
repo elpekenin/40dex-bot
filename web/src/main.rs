@@ -47,18 +47,19 @@ async fn main() -> std::io::Result<()> {
 
     let tmpl_reloader = web::Data::new(tmpl_reloader);
 
-    log::info!("starting HTTP server at http://localhost:8080");
+    log::info!("starting HTTP server");
 
     HttpServer::new(move || {
         App::new()
             .app_data(tmpl_reloader.clone())
-            .service(fs::Files::new("/static", "./static").show_files_listing())
-            .service(web::resource("/").route(web::get().to(handlers::index)))
+            .service(fs::Files::new("/static", "static").show_files_listing())
+            .service(web::resource("/40dex").route(web::get().to(handlers::index)))
+            .service(fs::Files::new("/", "static/dist").index_file("index.html"))
             .wrap(ErrorHandlers::new().handler(StatusCode::NOT_FOUND, handlers::not_found))
             .wrap(Logger::default())
     })
     .workers(2)
-    .bind(("0.0.0.0", 8080))?
+    .bind(("127.0.0.1", 8080))?
     .run()
     .await
 }
