@@ -18,6 +18,9 @@ pub enum UserCommand {
     #[command(description = "search string for non 40d pokemon species")]
     NonMaxed,
 
+    #[command(description = "display information")]
+    Stats,
+
     #[command(description = "display information about current version")]
     Version,
 }

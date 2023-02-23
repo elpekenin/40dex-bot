@@ -46,7 +46,7 @@
             </div>
 
     {% endfor %} {# Pokemons loop #}
-            <b class="align-middle" style="display: inline-block; font-size: calc(0.6*var(--size));">
+            <b class="align-middle" style="display: inline-block; font-size: calc(0.3*var(--size));">
                 {{ "✅" if family.pokemons | selectattr("level40") | max else "❌" }}
             </b> 
         </td> {# Level40 marker #}

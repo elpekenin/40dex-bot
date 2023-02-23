@@ -73,3 +73,34 @@ pub async fn generate_search_string(maxed: bool) -> String {
 
     format!("`{}`", markdown::escape(&string))
 }
+
+pub async fn stats() -> String {
+    let families = match database::get_merged().await {
+        Err(e) => return utils::format_error("There was an error reading database`", e),
+        Ok(families) => families,
+    };
+
+    let maxed: Vec<&MergedFamily> = families
+        .iter()
+        .filter(|f| f.pokemons.iter().any(|p| p.level40 > 0))
+        .collect();
+
+    let n_families = families.len();
+    let maxed_families = maxed.len();
+    let maxed_pokes = families.iter().fold(0, |acc, x| {
+        acc + x.pokemons.iter().fold(0, |acc, x| acc + x.level40)
+    });
+
+    format!(
+        "Level40: {}\nFamilies: {}/{}",
+        maxed_pokes, maxed_families, n_families
+    )
+}
+
+pub fn version() -> String {
+    format!(
+        "🌐: _{}_\n⏰:` {}`",
+        option_env!("GIT_HASH").unwrap_or("NA"),
+        option_env!("DATE").unwrap_or("NA")
+    )
+}

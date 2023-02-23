@@ -15,13 +15,9 @@ pub async fn handle(
 
         UserCommand::Help => commands::help(),
 
-        UserCommand::Version => {
-            format!(
-                "🤖 I was built\n    With commit: _{}_\n    At:` {}`",
-                env!("GIT_HASH"),
-                env!("DATE")
-            )
-        }
+        UserCommand::Stats => internal::stats().await,
+
+        UserCommand::Version => internal::version(),
     };
 
     let _ = bot.send_message(msg.chat.id, text).await;
