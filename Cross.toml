@@ -1,0 +1,18 @@
+[build]
+default-target = "armv7-unknown-linux-gnueabihf"
+pre-build = [
+    "dpkg --add-architecture $CROSS_DEB_ARCH", 
+    "apt-get update && apt-get --assume-yes install libssl-dev:$CROSS_DEB_ARCH"
+]
+
+[build.env]
+passthrough = [
+    "DATABASE_URL",
+    "RUST_LOG",
+    "TELOXIDE_TOKEN",
+    "TEMPLATE_AUTORELOAD",
+    "USERNAME",
+    "SQLX_OFFLINE=true",
+    "GIT_HASH",
+    "DATE"
+]

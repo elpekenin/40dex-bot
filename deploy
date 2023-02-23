@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# Push changes to GitHub
+git push
+
+# Add version info
+export GIT_HASH=$(git rev-parse --short HEAD)
+export DATE=$(date +"%H:%M — %d/%m/%Y")
+
+# Generate JSON
+cd database && cargo sqlx prepare && cd ..
+
+# Compile
+export RUST_LOG=info
+export CROSS_CONFIG=./Cross.toml
+export CARGO_TARGET_DIR=./binaries
+cross build --release --manifest-path ./bot/Cargo.toml
+cross build --release --manifest-path ./web/Cargo.toml
+
+# Stop services
+export SSH_USER=elpekenin
+export SSH_HOST=elraspberrin
+ssh $SSH_USER@$SSH_HOST "sudo systemctl stop bot"
+ssh $SSH_USER@$SSH_HOST "sudo systemctl stop web"
+
+# Copy executables to raspberry
+export SSH_PATH=~/40dex-rs/
+cd binaries/armv7-unknown-linux-gnueabihf/release
+scp bot $SSH_USER@$SSH_HOST:$SSH_PATH
+scp web $SSH_USER@$SSH_HOST:$SSH_PATH/web
+
+# Copy web files
+cd ../../..
+# scp -r ./web/static $SSH_USER@$SSH_HOST:$SSH_PATH/web # this is very slow
+scp -r ./web/templates $SSH_USER@$SSH_HOST:$SSH_PATH/web
+
+# Restart services
+export SSH_USER=elpekenin
+export SSH_HOST=elraspberrin
+ssh $SSH_USER@$SSH_HOST "sudo systemctl start bot"
+ssh $SSH_USER@$SSH_HOST "sudo systemctl start web"

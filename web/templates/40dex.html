@@ -6,9 +6,11 @@
 
 {% set regions = [1, 152, 252, 387, 494, 650, 722, 810] %}
 
+<div class="m-5 p-5" />
+
 <table style="margin-left: auto; margin-right: auto; text-align: center; transform: translateY(10px);">
 {% for family in families %}
-    {% set size = "min(100px, "~ (100/((family.pokemons | length) + 3)) | safe ~ "vw)" %}
+    {% set size = "min(100px, " ~ (100/((family.pokemons | length) + 3)) | safe ~ "vw)" %}
     <tr class="{{ family.pokemons | selectattr('name') | join(' ') }}">
         <td style="--size: {{ size }};">
     {% for pokemon in family.pokemons %}
@@ -19,7 +21,9 @@
         {% for region in regions %}
             {% if pokemon.dex == region %}
                 <a id="{{ loop.index0 + 1 }}">
+                {% if loop.index0 %}
                 <hr class="m-5 p-5" />
+                {% endif %}
             {% endif %}
         {% endfor %}
 

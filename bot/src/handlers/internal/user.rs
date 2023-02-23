@@ -2,22 +2,6 @@ use crate::utils;
 use database::MergedFamily;
 use teloxide::utils::markdown;
 
-pub fn get_commit_hash() -> String {
-    let result = std::process::Command::new("git")
-        .arg("rev-parse")
-        .arg("--short")
-        .arg("HEAD")
-        .output();
-
-    match result {
-        Err(_) => String::from("NA"),
-        Ok(output) => match String::from_utf8(output.stdout) {
-            Ok(string) => string,
-            Err(_) => String::from("NA"),
-        },
-    }
-}
-
 fn block_str(first: &i32, last: &i32) -> String {
     if first != last {
         return format!("{}-{}, ", first, last);
