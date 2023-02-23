@@ -17,7 +17,7 @@ pub async fn handle(
 
         UserCommand::Version => {
             format!(
-                "🤖 I was built\n  - With commit: _{}_\n  - At: `{}`",
+                "🤖 I was built\n  With commit: _{}_\n  At: `{}`",
                 env!("GIT_HASH"),
                 env!("DATE")
             )
