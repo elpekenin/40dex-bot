@@ -1,8 +1,7 @@
-<div class="input-group mb-3 pt-5" style="width: min(50vw, 500px); margin-left: auto; margin-right: 10vw;">
-  <div class="input-group-prepend">
+<div class="input-group mb-3 pt-5" style="width: auto;">
     <span class="input-group-text">🔍</span>
-  </div>
-  <input type="text" class="form-control" placeholder="Buscar"
+    <div style="border-left: 2px solid #000;"></div>
+    <input type="text" placeholder="Buscar" class="input-group-text"
   oninput="document.querySelectorAll('tr').forEach((e) => e.className.includes(this.value.toLowerCase())?e.style='':e.style='display: none;');"
   >
 </div>
