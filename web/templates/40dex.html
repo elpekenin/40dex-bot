@@ -10,7 +10,7 @@
 
 <table style="margin-left: auto; margin-right: auto; text-align: center; transform: translateY(10px);">
 {% for family in families %}
-    {% set size = "min(100px, " ~ (100/((family.pokemons | length) + 3)) | safe ~ "vw)" %}
+    {% set size = "min(100px, " ~ (100/((family.pokemons | length) + 4.5)) | safe ~ "vw)" %}
     <tr class="{{ family.pokemons | selectattr('name') | join(' ') }}">
         <td style="--size: {{ size }};">
     {% for pokemon in family.pokemons %}

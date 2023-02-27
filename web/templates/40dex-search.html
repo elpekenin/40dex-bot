@@ -1,7 +1,7 @@
 <div class="input-group mb-3 pt-5" style="width: auto;">
     <span class="input-group-text">🔍</span>
     <div style="border-left: 2px solid #000;"></div>
-    <input type="text" placeholder="Buscar" class="input-group-text"
+    <input type="text" placeholder="Buscar" class="input-group-text" style="width: max(100px, 15vw)"
   oninput="document.querySelectorAll('tr').forEach((e) => e.className.includes(this.value.toLowerCase())?e.style='':e.style='display: none;');"
   >
 </div>
