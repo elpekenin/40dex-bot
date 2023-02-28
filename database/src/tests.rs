@@ -66,3 +66,9 @@ async fn get_families_test() {
     let valid = get_families().await;
     assert_eq!(valid.is_err(), false);
 }
+
+#[tokio::test]
+async fn get_merged_test() {
+    let valid = get_merged(false).await;
+    assert_eq!(valid.is_err(), false);
+}

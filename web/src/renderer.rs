@@ -14,18 +14,10 @@ impl MiniJinjaRenderer {
         self.tmpl_env
             .acquire_env()
             .map_err(|e| {
-                error::ErrorInternalServerError(format!(
-                    "could not acquire template env: {}",
-                    e.to_string()
-                ))
+                error::ErrorInternalServerError(format!("could not acquire template env: {e}"))
             })?
             .get_template(tmpl)
-            .map_err(|e| {
-                error::ErrorInternalServerError(format!(
-                    "could not find template {}",
-                    e.to_string()
-                ))
-            })?
+            .map_err(|e| error::ErrorInternalServerError(format!("could not find template {e}")))?
             .render(ctx.into())
             .map(Html)
             .map_err(|err| {

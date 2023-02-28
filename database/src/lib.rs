@@ -4,7 +4,6 @@ use sqlx::{
     Error, Pool, Postgres,
     postgres::PgPoolOptions,
 };
-use std;
 
 #[derive(Debug, Serialize, Clone)]
 pub struct Pokemon {
