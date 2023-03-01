@@ -2,12 +2,12 @@ use crate::utils;
 use database::MergedFamily;
 use teloxide::utils::markdown;
 
-fn block_str(first: &i32, last: &i32) -> String {
+fn block_str(first: i32, last: i32) -> String {
     if first != last {
-        return format!("{}-{}, ", first, last);
+        return format!("{first}-{last}, ");
     }
 
-    format!("{}, ", last)
+    format!("{last}, ")
 }
 
 fn pokemon_vec_to_string(vector: Vec<&i32>) -> String {
@@ -18,7 +18,7 @@ fn pokemon_vec_to_string(vector: Vec<&i32>) -> String {
     for dex in vector {
         // Non-contiguous number, add previous block to string
         if *dex > last + 1 {
-            output.push_str(&block_str(first, last));
+            output.push_str(&block_str(*first, *last));
             first = dex;
         }
 
@@ -26,7 +26,7 @@ fn pokemon_vec_to_string(vector: Vec<&i32>) -> String {
     }
 
     // Add last block if not there yet
-    let last_block = &block_str(first, last);
+    let last_block = &block_str(*first, *last);
     if !output.ends_with(last_block) {
         output.push_str(last_block);
     }
@@ -66,10 +66,7 @@ pub async fn generate_search_string(maxed: bool) -> String {
         Ok(families) => families,
     };
 
-    let string = match maxed {
-        true => already_maxed_string(families),
-        false => non_maxed_string(families),
-    };
+    let string = if maxed { already_maxed_string(families) } else { non_maxed_string(families) };
 
     format!("`{}`", markdown::escape(&string))
 }
@@ -92,8 +89,7 @@ pub async fn stats() -> String {
     });
 
     format!(
-        "Level40: {}\nFamilies: {}/{}",
-        maxed_pokes, maxed_families, n_families
+        "Level40: {maxed_pokes}\nFamilies: {maxed_families}/{n_families}"
     )
 }
 

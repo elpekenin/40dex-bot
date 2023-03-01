@@ -10,25 +10,30 @@ pub async fn handle(
     cmd: AdminCommand,
 ) -> ResponseResult<()> {
     // Permission guard clause
-    match utils::check_permission(msg.clone()) {
-        Some(x) => {
-            if !x {
-                let _ = bot
-                    .send_message(msg.chat.id, "You are not allowed to do that")
-                    .await;
+    if let Some(x) = utils::check_permission(msg.clone()) {
+        if !x {
+            let _ = bot
+                .send_message(msg.chat.id, "You are not allowed to do that")
+                .await;
 
-                log::warn!(
-                    "{} tried using an admin command",
-                    msg.from().unwrap().username.as_deref().unwrap()
-                );
+            log::warn!(
+                "{} tried using an admin command",
+                match msg.from() {
+                    Some(from) => {
+                        match from.username.as_deref() {
+                            Some(x) => x,
+                            None => "<no username>",
+                        }
+                    },
+                    None => "<no message WTF>"
+                }
+            );
 
-                return Ok(());
-            }
-        }
-        None => {
-            log::error!("Could't check permission...");
             return Ok(());
         }
+    } else {
+        log::error!("Could't check permission...");
+        return Ok(());
     }
 
     let text = match cmd {
