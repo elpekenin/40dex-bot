@@ -46,13 +46,9 @@ fn get_error_response<B>(res: &ServiceResponse<B>, error: &str) -> HttpResponse 
         status_code => res.status().as_str(),
     };
 
-    match tmpl_env.render("error.html", ctx) {
-        Ok(body) => body
+    tmpl_env.render("error.html", ctx).map_or_else(|_| fallback(error), |body| body
             .customize()
             .with_status(res.status())
             .respond_to(req)
-            .map_into_boxed_body(),
-
-        Err(_) => fallback(error),
-    }
+            .map_into_boxed_body())
 }
