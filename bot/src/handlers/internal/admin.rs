@@ -16,7 +16,7 @@ pub async fn update_pokemon(
     };
 
     match pokemon {
-        Err(e) => utils::format_error("There was an error updating the counter", e),
+        Err(e) => utils::format_error("There was an error updating the counter", &e),
         Ok(pokemon) => {
             let counter = match table {
                 "level40" => pokemon.level40,

@@ -10,7 +10,7 @@ pub async fn handle(
     cmd: AdminCommand,
 ) -> ResponseResult<()> {
     // Permission guard clause
-    if let Some(x) = utils::check_permission(msg.clone()) {
+    if let Some(x) = utils::check_permission(&msg) {
         if !x {
             let _ = bot
                 .send_message(msg.chat.id, "You are not allowed to do that")
@@ -20,10 +20,7 @@ pub async fn handle(
                 "{} tried using an admin command",
                 match msg.from() {
                     Some(from) => {
-                        match from.username.as_deref() {
-                            Some(x) => x,
-                            None => "<no username>",
-                        }
+                        from.username.as_deref().unwrap_or("<no username>")
                     },
                     None => "<no message WTF>"
                 }

@@ -35,7 +35,7 @@ fn pokemon_vec_to_string(vector: Vec<&i32>) -> String {
     output.trim_end_matches(", ").to_string()
 }
 
-pub fn already_maxed_string(families: Vec<MergedFamily>) -> String {
+pub fn already_maxed_string(families: &[MergedFamily]) -> String {
     let mut filtered: Vec<&i32> = families
         .iter()
         .filter(|f| f.pokemons.iter().any(|p| p.level40 > 0))
@@ -49,7 +49,7 @@ pub fn already_maxed_string(families: Vec<MergedFamily>) -> String {
     string
 }
 
-pub fn non_maxed_string(families: Vec<MergedFamily>) -> String {
+pub fn non_maxed_string(families: &[MergedFamily]) -> String {
     let mut filtered: Vec<&i32> = families
         .iter()
         .filter(|f| f.pokemons.iter().all(|p| p.level40 == 0))
@@ -62,28 +62,26 @@ pub fn non_maxed_string(families: Vec<MergedFamily>) -> String {
 
 pub async fn generate_search_string(maxed: bool) -> String {
     let families = match database::get_merged().await {
-        Err(e) => return utils::format_error("There was an error reading database`", e),
+        Err(e) => return utils::format_error("There was an error reading database`", &e),
         Ok(families) => families,
     };
 
-    let string = if maxed { already_maxed_string(families) } else { non_maxed_string(families) };
+    let string = if maxed { already_maxed_string(&families) } else { non_maxed_string(&families) };
 
     format!("`{}`", markdown::escape(&string))
 }
 
 pub async fn stats() -> String {
     let families = match database::get_merged().await {
-        Err(e) => return utils::format_error("There was an error reading database`", e),
+        Err(e) => return utils::format_error("There was an error reading database`", &e),
         Ok(families) => families,
     };
 
-    let maxed: Vec<&MergedFamily> = families
+    let n_families = families.len();
+    let maxed_families = families
         .iter()
         .filter(|f| f.pokemons.iter().any(|p| p.level40 > 0))
-        .collect();
-
-    let n_families = families.len();
-    let maxed_families = maxed.len();
+        .count();
     let maxed_pokes = families.iter().fold(0, |acc, x| {
         acc + x.pokemons.iter().fold(0, |acc, x| acc + x.level40)
     });
