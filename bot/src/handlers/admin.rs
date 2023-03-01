@@ -18,12 +18,7 @@ pub async fn handle(
 
             log::warn!(
                 "{} tried using an admin command",
-                match msg.from() {
-                    Some(from) => {
-                        from.username.as_deref().unwrap_or("<no username>")
-                    },
-                    None => "<no message WTF>"
-                }
+                msg.from().map_or("<no message WTF>", |from| from.username.as_deref().unwrap_or("<no username>"))
             );
 
             return Ok(());
