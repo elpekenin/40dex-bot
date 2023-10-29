@@ -47,7 +47,7 @@ pub enum AdminCommand {
 pub fn descriptions() -> Vec<BotCommand> {
     UserCommand::bot_commands()
         .into_iter()
-        .chain(AdminCommand::bot_commands().into_iter())
+        .chain(AdminCommand::bot_commands())
         .collect()
 }
 

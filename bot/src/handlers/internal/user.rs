@@ -36,12 +36,12 @@ fn pokemon_vec_to_string(vector: Vec<&i32>) -> String {
 }
 
 pub fn already_maxed_string(families: &[MergedFamily]) -> String {
-    let mut filtered: Vec<&i32> = families
+    let filtered: Vec<&i32> = families
         .iter()
         .filter(|f| f.pokemons.iter().any(|p| p.level40 > 0))
         .flat_map(|f| f.pokemons.iter().map(|p| &p.dex))
         .collect(); // Convert Iterator into Vec
-    filtered.sort();
+    // filtered.sort();
 
     let mut string = pokemon_vec_to_string(filtered);
     string.push_str(" & !n40 & shiny & lucky");
@@ -50,12 +50,12 @@ pub fn already_maxed_string(families: &[MergedFamily]) -> String {
 }
 
 pub fn non_maxed_string(families: &[MergedFamily]) -> String {
-    let mut filtered: Vec<&i32> = families
+    let filtered: Vec<&i32> = families
         .iter()
         .filter(|f| f.pokemons.iter().all(|p| p.level40 == 0))
         .flat_map(|f| f.pokemons.iter().map(|p| &p.dex))
         .collect(); // Convert Iterator into Vec
-    filtered.sort();
+    // filtered.sort();
 
     pokemon_vec_to_string(filtered)
 }

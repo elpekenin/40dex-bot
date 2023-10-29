@@ -11,7 +11,7 @@ async fn connect_test() {
         .connect(&url)
         .await;
 
-    assert!(!result.is_err(), "Couldn't connect to database");
+    assert!(result.is_ok(), "Couldn't connect to database");
 }
 
 #[tokio::test]
@@ -20,7 +20,7 @@ async fn dex2name_test() {
     assert_eq!(bulbasaur, "bulbasaur");
 
     let invalid = dex2name(-1).await;
-    assert_eq!(invalid.is_err(), true);
+    assert!(invalid.is_err());
 }
 
 #[tokio::test]
@@ -32,7 +32,7 @@ async fn name2dex_test() {
     assert_eq!(bulbasaur, 1);
 
     let invalid = name2dex("").await;
-    assert_eq!(invalid.is_err(), true);
+    assert!(invalid.is_err());
 }
 
 #[tokio::test]
@@ -64,11 +64,11 @@ async fn update_tradeable_test() {
 #[tokio::test]
 async fn get_families_test() {
     let valid = get_families().await;
-    assert_eq!(valid.is_err(), false);
+    assert!(valid.is_ok());
 }
 
 #[tokio::test]
 async fn get_merged_test() {
     let valid = get_merged().await;
-    assert_eq!(valid.is_err(), false);
+    assert!(valid.is_ok());
 }
