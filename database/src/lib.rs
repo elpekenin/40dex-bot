@@ -164,11 +164,12 @@ pub async fn get_merged() -> Result<Vec<MergedFamily>, Error> {
     let families = get_families().await?;
     let pokemons = get_pokemons().await?;
 
-    let merged: Vec<MergedFamily> = families
+    let mut merged: Vec<MergedFamily> = families
             .iter()
             .map(|f| {
-                let pokemons: Vec<Pokemon> = pokemons.clone().into_iter().filter(|p| f.pokemons.contains(&p.dex)).collect();
-                // pokemons.sort_by(|x, y| x.dex.cmp(&y.dex));
+                // sort family's pokedex numbers
+                let mut pokemons: Vec<Pokemon> = pokemons.clone().into_iter().filter(|p| f.pokemons.contains(&p.dex)).collect();
+                pokemons.sort_by(|x, y| x.dex.cmp(&y.dex));
 
                 MergedFamily {
                     id: f.id,
@@ -177,6 +178,9 @@ pub async fn get_merged() -> Result<Vec<MergedFamily>, Error> {
                 }
             })
             .collect();
+
+    // sort families by their first region
+    merged.sort_by(|x, y| x.regions.first().cmp(&y.regions.first()));
 
     Ok(merged)
 }
