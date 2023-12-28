@@ -10,8 +10,7 @@ pub async fn handle(
     cmd: UserCommand,
 ) -> ResponseResult<()> {
     let text = match cmd {
-        UserCommand::AlreadyMaxed => internal::generate_search_string(true).await,
-        UserCommand::NonMaxed => internal::generate_search_string(false).await,
+        UserCommand::NonMaxed => internal::generate_search_string().await,
 
         UserCommand::Help => commands::help(),
 

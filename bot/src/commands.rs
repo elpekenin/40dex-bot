@@ -9,9 +9,6 @@ use teloxide::{
     description = "Commands available for everyone"
 )]
 pub enum UserCommand {
-    #[command(description = "search string to cleanup already 40d pokemon species")]
-    AlreadyMaxed,
-
     #[command(description = "display this help message")]
     Help,
 

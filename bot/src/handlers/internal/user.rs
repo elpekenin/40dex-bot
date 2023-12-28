@@ -10,14 +10,16 @@ fn block_str(first: i32, last: i32) -> String {
     format!("{last}, ")
 }
 
-fn pokemon_vec_to_string(vector: Vec<&i32>) -> String {
+fn pokemon_vec_to_string(vector: &mut Vec<&i32>) -> String {
+    vector.sort();
+
     let mut output = String::new();
     let mut first = vector[0];
     let mut last = vector[0];
 
     for dex in vector {
         // Non-contiguous number, add previous block to string
-        if *dex > last + 1 {
+        if *dex > &(last + 1) {
             output.push_str(&block_str(*first, *last));
             first = dex;
         }
@@ -35,39 +37,19 @@ fn pokemon_vec_to_string(vector: Vec<&i32>) -> String {
     output.trim_end_matches(", ").to_string()
 }
 
-pub fn already_maxed_string(families: &[MergedFamily]) -> String {
-    let filtered: Vec<&i32> = families
-        .iter()
-        .filter(|f| f.pokemons.iter().any(|p| p.level40 > 0))
-        .flat_map(|f| f.pokemons.iter().map(|p| &p.dex))
-        .collect(); // Convert Iterator into Vec
-    // filtered.sort();
-
-    let mut string = pokemon_vec_to_string(filtered);
-    string.push_str(" & !n40 & shiny & lucky");
-
-    string
-}
-
-pub fn non_maxed_string(families: &[MergedFamily]) -> String {
-    let filtered: Vec<&i32> = families
-        .iter()
-        .filter(|f| f.pokemons.iter().all(|p| p.level40 == 0))
-        .flat_map(|f| f.pokemons.iter().map(|p| &p.dex))
-        .collect(); // Convert Iterator into Vec
-    // filtered.sort();
-
-    pokemon_vec_to_string(filtered)
-}
-
-pub async fn generate_search_string(maxed: bool) -> String {
+pub async fn generate_search_string() -> String {
     let families = match database::get_merged().await {
         Err(e) => return utils::format_error("There was an error reading database`", &e),
         Ok(families) => families,
     };
 
-    let string = if maxed { already_maxed_string(&families) } else { non_maxed_string(&families) };
+    let mut filtered: Vec<&i32> = families
+        .iter()
+        .filter(|f| f.pokemons.iter().all(|p| p.level40 == 0))
+        .flat_map(|f| f.pokemons.iter().map(|p| &p.dex))
+        .collect(); // Convert Iterator into Vec
 
+    let string = pokemon_vec_to_string(&mut filtered);
     format!("`{}`", markdown::escape(&string))
 }
 
